@@ -35,7 +35,7 @@ func UpdateApiInfo(apiUser, apiKey string) {
 // fromName     string 否   发件人名称
 // replyTo      string 否   设置用户默认的回复邮件地址. 如果 replyTo 没有或者为空, 则默认的回复邮件地址为 from
 // subject      string *    邮件标题
-func SendTemplateMail(invokeName, from, fromName, replyTo, subject string, toList []map[string]string, filename string) (bool, error, string) {
+func SendTemplateMail(invokeName, from, fromName, replyTo, subject string, toList []map[string]string, filename []string) (bool, error, string) {
 	var toMap = map[string]interface{}{}
 	var toMailList = make([]string, len(toList))
 	var sub = map[string][]string{}
@@ -83,7 +83,7 @@ func SendTemplateMail(invokeName, from, fromName, replyTo, subject string, toLis
 // fromName     string 否   发件人名称
 // replyTo      string 否   设置用户默认的回复邮件地址. 如果 replyTo 没有或者为空, 则默认的回复邮件地址为 from
 // subject      string *    邮件标题
-func SendTemplateMailToAddressList(addressList, invokeName, from, fromName, replyTo, subject, filename string) (bool, error, string) {
+func SendTemplateMailToAddressList(addressList, invokeName, from, fromName, replyTo, subject string, filename []string) (bool, error, string) {
 	params := url.Values{
 		"to":       {addressList},
 		"from":     {from},
@@ -131,54 +131,112 @@ func doRequest(url string, params url.Values) (bool, error, string) {
 	return (result["result"] == true), err, string(bodyByte)
 }
 
-func doRequestWithFile(url string, params url.Values, fileField, filename string) (bool, error, string) {
+//func doRequestWithFile(url string, params url.Values, fileField string, filenames []string) (bool, error, string) {
+//	if len(MailApiKey) == 0 || len(MailApiUser) == 0 {
+//		return false, errors.New("请先配置 api 信息"), ""
+//	}
+//	params.Add("apiUser", MailApiUser)
+//	params.Add("apiKey", MailApiKey)
+//
+//	var bodyBuf    = bytes.NewBufferString("")
+//	var bodyWriter = multipart.NewWriter(bodyBuf)
+//	defer bodyWriter.Close()
+//
+//	for key, value := range params {
+//		_ = bodyWriter.WriteField(key, value[0])
+//	}
+//
+//	var readers = make([]io.Reader, 0)
+//	readers = append(readers, bodyBuf)
+//
+//	var fileSize int64
+//	for _, filename := range filenames {
+//		_, err := bodyWriter.CreateFormFile(fileField, filename)
+//		if err != nil {
+//			return false, err, ""
+//		}
+//
+//		file, err := os.Open(filename)
+//		if err != nil {
+//			return false, err, ""
+//		}
+//
+//		readers = append(readers, file)
+//
+//		fileInfo, err := file.Stat()
+//		if err != nil {
+//			return false, err, ""
+//		}
+//
+//		fileSize = fileSize + fileInfo.Size()
+//	}
+//
+//	var requestReader io.Reader
+//	var boundary = bodyWriter.Boundary()
+//
+//	var closeBuf = bytes.NewBufferString(fmt.Sprintf("\r\n--%s--\r\n", boundary))
+//
+//	readers = append(readers, closeBuf)
+//	requestReader = io.MultiReader(readers...)
+//	request, err := http.NewRequest("POST", url, requestReader)
+//	if err != nil {
+//		return false, err, ""
+//	}
+//	request.Header.Add("Content-Type", bodyWriter.FormDataContentType())
+//	request.ContentLength = fileSize + int64(bodyBuf.Len()) + int64(closeBuf.Len())
+//
+//	responseHandler, err := http.DefaultClient.Do(request)
+//	if err != nil {
+//		return false, err, ""
+//	}
+//	defer responseHandler.Body.Close()
+//
+//	bodyByte, err := ioutil.ReadAll(responseHandler.Body)
+//	if err != nil {
+//		return false, err, string(bodyByte)
+//	}
+//
+//	var result map[string]interface{}
+//	err = json.Unmarshal(bodyByte, &result)
+//	return (result["result"] == true), err, string(bodyByte)
+//}
+
+func doRequestWithFile(url string, params url.Values, fileField string, filenames []string) (bool, error, string) {
 	if len(MailApiKey) == 0 || len(MailApiUser) == 0 {
 		return false, errors.New("请先配置 api 信息"), ""
 	}
+
 	params.Add("apiUser", MailApiUser)
 	params.Add("apiKey", MailApiKey)
 
-	var bodyBuf    = bytes.NewBufferString("")
-	var bodyWriter = multipart.NewWriter(bodyBuf)
+	var body = &bytes.Buffer{}
+	var writer = multipart.NewWriter(body)
 
-	for key, val := range params {
-		_ = bodyWriter.WriteField(key, val[0])
-	}
-
-	_, err := bodyWriter.CreateFormFile(fileField, filename)
-	if err != nil {
-		return false, err, ""
-	}
-
-	var boundary = bodyWriter.Boundary()
-	var closeBuf = bytes.NewBufferString(fmt.Sprintf("\r\n--%s--\r\n", boundary))
-
-	var requestReader io.Reader
-	var fileSize      int64
-	if filename != "" {
+	for _, filename := range filenames {
 		file, err := os.Open(filename)
-		defer file.Close()
-		if err != nil {
-			return false, err, ""
-		}
-		requestReader = io.MultiReader(bodyBuf, file, closeBuf)
-
-		fileInfo, err := file.Stat()
 		if err != nil {
 			return false, err, ""
 		}
 
-		fileSize = fileInfo.Size()
-	} else {
-		requestReader = io.MultiReader(bodyBuf, closeBuf)
+		fileWriter, err := writer.CreateFormFile(fileField, filename)
+		if err != nil {
+			return false, err, ""
+		}
+		_, err = io.Copy(fileWriter, file)
+		file.Close()
 	}
 
-	request, err := http.NewRequest("POST", url, requestReader)
+	for key, value := range params {
+		_ = writer.WriteField(key, value[0])
+	}
+
+	var err = writer.Close()
 	if err != nil {
 		return false, err, ""
 	}
-	request.Header.Add("Content-Type", "multipart/form-data; boundary="+boundary)
-	request.ContentLength = fileSize + int64(bodyBuf.Len()) + int64(closeBuf.Len())
+
+	request, err := http.NewRequest("POST", url, body)
+	request.Header.Set("Content-Type", writer.FormDataContentType())
 
 	responseHandler, err := http.DefaultClient.Do(request)
 	if err != nil {
@@ -194,4 +252,5 @@ func doRequestWithFile(url string, params url.Values, fileField, filename string
 	var result map[string]interface{}
 	err = json.Unmarshal(bodyByte, &result)
 	return (result["result"] == true), err, string(bodyByte)
+
 }
