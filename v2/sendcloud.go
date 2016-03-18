@@ -7,10 +7,12 @@ import (
 	"io/ioutil"
 	"encoding/json"
 	"errors"
+	"fmt"
 )
 
 const (
 	SEND_CLOUD_SEND_TEMPLATE_API_URL   = "http://api.sendcloud.net/apiv2/mail/sendtemplate"
+	SEND_CLOUD_MAIL_TASK_INFO_API_URL  = "http://api.sendcloud.net/apiv2/mail/taskinfo"
 )
 
 var (
@@ -89,6 +91,15 @@ func SendTemplateMailToAddressList(addressList, invokeName, from, fromName, repl
 		"useAddressList": {"true"},
 	}
 	return doRequest(SEND_CLOUD_SEND_TEMPLATE_API_URL, params)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// GetTaskInfo 获取邮件地址列表发送任务信息
+// maillistTaskId   int  是  返回的maillistTaskId
+func GetTaskInfo(maillistTaskId int) (bool, error, string) {
+	params := url.Values{}
+	params.Add("maillistTaskId", fmt.Sprintf("%d", maillistTaskId))
+	return doRequest(SEND_CLOUD_MAIL_TASK_INFO_API_URL, params)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
