@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	SEND_CLOUD_TEMPLATE_SEND_API_URL   = "http://api.sendcloud.net/apiv2/mail/sendtemplate"
+	SEND_CLOUD_SEND_TEMPLATE_API_URL   = "http://api.sendcloud.net/apiv2/mail/sendtemplate"
 )
 
 var (
@@ -25,11 +25,11 @@ func UpdateApiInfo(apiUser, apiKey string) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // SendMailWithTemplate 模板发送
-// templateInvokeName   string 是   邮件模板调用名称
-// from                 string 是   发件人地址
-// fromName             string 否   发件人名称
-// replyTo              string 否   设置用户默认的回复邮件地址. 如果 replyTo 没有或者为空, 则默认的回复邮件地址为 from
-// subject              string *    邮件标题
+// invokeName   string 是   邮件模板调用名称
+// from         string 是   发件人地址
+// fromName     string 否   发件人名称
+// replyTo      string 否   设置用户默认的回复邮件地址. 如果 replyTo 没有或者为空, 则默认的回复邮件地址为 from
+// subject      string *    邮件标题
 func SendTemplateMail(invokeName, from, fromName, replyTo, subject string, toList []map[string]string) (bool, error, string) {
 	var toMap = map[string]interface{}{}
 	var toMailList = make([]string, len(toList))
@@ -67,7 +67,28 @@ func SendTemplateMail(invokeName, from, fromName, replyTo, subject string, toLis
 		"xsmtpapi":    {substitutionVars},
 	}
 
-	return doRequest(SEND_CLOUD_TEMPLATE_SEND_API_URL, params)
+	return doRequest(SEND_CLOUD_SEND_TEMPLATE_API_URL, params)
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// SendTemplateMailWithAddressList 向邮件地址列表发送邮件
+// addressList  string 是   邮件地址列表
+// invokeName   string 是   邮件模板调用名称
+// from         string 是   发件人地址
+// fromName     string 否   发件人名称
+// replyTo      string 否   设置用户默认的回复邮件地址. 如果 replyTo 没有或者为空, 则默认的回复邮件地址为 from
+// subject      string *    邮件标题
+func SendTemplateMailToAddressList(addressList, invokeName, from, fromName, replyTo, subject string) (bool, error, string) {
+	params := url.Values{
+		"to":       {addressList},
+		"from":     {from},
+		"fromName": {fromName},
+		"replyTo":  {replyTo},
+		"subject":  {subject},
+		"templateInvokeName": {invokeName},
+		"useAddressList": {"true"},
+	}
+	return doRequest(SEND_CLOUD_SEND_TEMPLATE_API_URL, params)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
