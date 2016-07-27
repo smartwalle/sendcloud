@@ -24,7 +24,7 @@ const (
 //limit    int  否  查询个数, 取值区间 [0-100], 默认为 100
 func GetAddressList(address string, start, limit int) (bool, error, string) {
 	params := url.Values{}
-	if address != "" {
+	if len(address) > 0 {
 		params.Add("address", address)
 	}
 	if start >= 0 {

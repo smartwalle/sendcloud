@@ -50,6 +50,10 @@ func GetTemplateList(invokeName string, templateType, templateStat, start, limit
 		params.Add("limit", fmt.Sprintf("%d", limit))
 	}
 
+	if len(invokeName) > 0 {
+		params.Add("invokeName", invokeName)
+	}
+
 	return doRequest(SEND_CLOUD_TEMPLATE_LIST_API_URL, params)
 }
 
