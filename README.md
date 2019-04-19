@@ -14,7 +14,7 @@ v2 版本新功能：
 设置 API 信息：
 
 ```
-UpdateApiInfo("api_user", "api_key")
+var c = sendcloud.New("api_user", "api_key")
 ```
 
 发送邮件：
@@ -22,7 +22,7 @@ UpdateApiInfo("api_user", "api_key")
 ```
 var to = make([]map[string]string, 1)
 to[0] = map[string]string{"to":"917996695@qq.com", "%url%": "http://www.baidu.com"}
-var ok, err, result = SendTemplateMail("template name", "from mail", "from name", "replay to email address", "subject", to, nil)
+var ok, err, result = c.SendTemplateMail("template name", "from mail", "from name", "replay to email address", "subject", to, nil)
 ```
 
 返回数据说明：
