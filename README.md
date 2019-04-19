@@ -20,8 +20,8 @@ var c = sendcloud.New("api_user", "api_key")
 发送邮件：
 
 ```
-var to = make([]map[string]string, 1)
-to[0] = map[string]string{"to":"917996695@qq.com", "%url%": "http://www.baidu.com"}
+var to = make([]*sendcloud.To, 1)
+to[0] = &sendcloud.To{To:"917996695@qq.com"}
 var ok, err, result = c.SendTemplateMail("template name", "from mail", "from name", "replay to email address", "subject", to, nil)
 ```
 

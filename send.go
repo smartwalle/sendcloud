@@ -27,27 +27,30 @@ type SendTemplateRsp struct {
 	} `json:"info"`
 }
 
+type To struct {
+	To    string
+	Param map[string]string
+}
+
 // SendMailWithTemplate 模板发送
 // invokeName   string 是   邮件模板调用名称
 // from         string 是   发件人地址
 // fromName     string 否   发件人名称
 // replyTo      string 否   设置用户默认的回复邮件地址. 如果 replyTo 没有或者为空, 则默认的回复邮件地址为 from
 // subject      string *    邮件标题
-func (this *Client) SendTemplateMail(invokeName, from, fromName, replyTo, subject string, toList []map[string]string, filename []string) (result *SendTemplateRsp, err error) {
+func (this *Client) SendTemplateMail(invokeName, from, fromName, replyTo, subject string, toList []*To, filename []string) (result *SendTemplateRsp, err error) {
 	var toMap = map[string]interface{}{}
 	var toMailList = make([]string, len(toList))
 	var sub = map[string][]string{}
 
 	for index, item := range toList {
-		for key, value := range item {
-			if key == "to" {
-				toMailList[index] = value
-			} else {
-				if _, ok := sub[key]; !ok {
-					sub[key] = make([]string, len(toList))
-				}
-				sub[key][index] = value
+		toMailList[index] = item.To
+
+		for key, value := range item.Param {
+			if _, ok := sub[key]; !ok {
+				sub[key] = make([]string, len(toList))
 			}
+			sub[key][index] = value
 		}
 	}
 	toMap["to"] = toMailList
