@@ -1,31 +1,33 @@
 package sendcloud
 
 import (
-	"net/url"
 	"bytes"
-	"net/http"
-	"io/ioutil"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
-	"mime/multipart"
 	"io"
+	"io/ioutil"
+	"mime/multipart"
+	"net/http"
+	"net/url"
+	"os"
 )
 
 const (
-	SEND_CLOUD_SEND_TEMPLATE_API_URL   = "http://api.sendcloud.net/apiv2/mail/sendtemplate"
-	SEND_CLOUD_MAIL_TASK_INFO_API_URL  = "http://api.sendcloud.net/apiv2/mail/taskinfo"
+	kSendTemplate = "http://api.sendcloud.net/apiv2/mail/sendtemplate"
+	kMailTaskInfo = "http://api.sendcloud.net/apiv2/mail/taskinfo"
 )
 
-var (
-	MailApiUser = ""
-	MailApiKey  = ""
-)
+type Client struct {
+	apiUser string
+	apiKey  string
+}
 
-func UpdateApiInfo(apiUser, apiKey string) {
-	MailApiUser = apiUser
-	MailApiKey  = apiKey
+func New(apiUser, apiKey string) *Client {
+	var c = &Client{}
+	c.apiUser = apiUser
+	c.apiKey = apiKey
+	return c
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -35,7 +37,7 @@ func UpdateApiInfo(apiUser, apiKey string) {
 // fromName     string 否   发件人名称
 // replyTo      string 否   设置用户默认的回复邮件地址. 如果 replyTo 没有或者为空, 则默认的回复邮件地址为 from
 // subject      string *    邮件标题
-func SendTemplateMail(invokeName, from, fromName, replyTo, subject string, toList []map[string]string, filename []string) (bool, error, string) {
+func (this *Client) SendTemplateMail(invokeName, from, fromName, replyTo, subject string, toList []map[string]string, filename []string) (bool, error, string) {
 	var toMap = map[string]interface{}{}
 	var toMailList = make([]string, len(toList))
 	var sub = map[string][]string{}
@@ -59,20 +61,20 @@ func SendTemplateMail(invokeName, from, fromName, replyTo, subject string, toLis
 
 	var substitutionVarsBytes, err = json.Marshal(toMap)
 	if err != nil {
-		return false ,err, ""
+		return false, err, ""
 	}
 
-	var substitutionVars  = string(substitutionVarsBytes)
-	params := url.Values {
-		"from":     {from},
-		"fromName": {fromName},
-		"replyTo":  {replyTo},
-		"subject":  {subject},
+	var substitutionVars = string(substitutionVarsBytes)
+	params := url.Values{
+		"from":               {from},
+		"fromName":           {fromName},
+		"replyTo":            {replyTo},
+		"subject":            {subject},
 		"templateInvokeName": {invokeName},
-		"xsmtpapi":    {substitutionVars},
+		"xsmtpapi":           {substitutionVars},
 	}
 
-	return doRequestWithFile(SEND_CLOUD_SEND_TEMPLATE_API_URL, params, "attachments", filename)
+	return this.doRequestWithFile(kSendTemplate, params, "attachments", filename)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -83,60 +85,62 @@ func SendTemplateMail(invokeName, from, fromName, replyTo, subject string, toLis
 // fromName     string 否   发件人名称
 // replyTo      string 否   设置用户默认的回复邮件地址. 如果 replyTo 没有或者为空, 则默认的回复邮件地址为 from
 // subject      string *    邮件标题
-func SendTemplateMailToAddressList(addressList, invokeName, from, fromName, replyTo, subject string, filename []string) (bool, error, string) {
+func (this *Client) SendTemplateMailToAddressList(addressList, invokeName, from, fromName, replyTo, subject string, filename []string) (bool, error, string) {
 	params := url.Values{
-		"to":       {addressList},
-		"from":     {from},
-		"fromName": {fromName},
-		"replyTo":  {replyTo},
-		"subject":  {subject},
+		"to":                 {addressList},
+		"from":               {from},
+		"fromName":           {fromName},
+		"replyTo":            {replyTo},
+		"subject":            {subject},
 		"templateInvokeName": {invokeName},
-		"useAddressList": {"true"},
+		"useAddressList":     {"true"},
 	}
-	return doRequestWithFile(SEND_CLOUD_SEND_TEMPLATE_API_URL, params, "attachments", filename)
+	return this.doRequestWithFile(kSendTemplate, params, "attachments", filename)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // GetTaskInfo 获取邮件地址列表发送任务信息
 // mailListTaskId   int  是  返回的mailListTaskId
-func GetTaskInfo(mailListTaskId int) (bool, error, string) {
+func (this *Client) GetTaskInfo(mailListTaskId int) (bool, error, string) {
 	params := url.Values{}
 	params.Add("maillistTaskId", fmt.Sprintf("%d", mailListTaskId))
-	return doRequest(SEND_CLOUD_MAIL_TASK_INFO_API_URL, params)
+	return this.doRequest(kMailTaskInfo, params)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // doRequest 发起网络请求
-func doRequest(url string, params url.Values) (bool, error, string) {
-	if len(MailApiKey) == 0 || len(MailApiUser) == 0 {
+func (this *Client) doRequest(url string, params url.Values) (bool, error, string) {
+	if len(this.apiKey) == 0 || len(this.apiUser) == 0 {
 		return false, errors.New("请先配置 api 信息"), ""
 	}
-	params.Add("apiUser", MailApiUser)
-	params.Add("apiKey", MailApiKey)
+	params.Add("apiUser", this.apiUser)
+	params.Add("apiKey", this.apiKey)
 
 	var body = bytes.NewBufferString(params.Encode())
-	responseHandler, err := http.Post(url, "application/x-www-form-urlencoded", body)
+	rsp, err := http.Post(url, "application/x-www-form-urlencoded", body)
+	if rsp.Body != nil {
+		defer rsp.Body.Close()
+	}
 	if err != nil {
 		return false, err, ""
 	}
-	defer responseHandler.Body.Close()
 
-	bodyByte, err := ioutil.ReadAll(responseHandler.Body)
+	bodyByte, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
 		return false, err, string(bodyByte)
 	}
 
 	var result map[string]interface{}
 	err = json.Unmarshal(bodyByte, &result)
-	return (result["result"] == true), err, string(bodyByte)
+	return result["result"] == true, err, string(bodyByte)
 }
 
 //func doRequestWithFile(url string, params url.Values, fileField string, filenames []string) (bool, error, string) {
-//	if len(MailApiKey) == 0 || len(MailApiUser) == 0 {
+//	if len(apiKey) == 0 || len(apiUser) == 0 {
 //		return false, errors.New("请先配置 api 信息"), ""
 //	}
-//	params.Add("apiUser", MailApiUser)
-//	params.Add("apiKey", MailApiKey)
+//	params.Add("apiUser", apiUser)
+//	params.Add("apiKey", apiKey)
 //
 //	var bodyBuf    = bytes.NewBufferString("")
 //	var bodyWriter = multipart.NewWriter(bodyBuf)
@@ -201,13 +205,13 @@ func doRequest(url string, params url.Values) (bool, error, string) {
 //	return (result["result"] == true), err, string(bodyByte)
 //}
 
-func doRequestWithFile(url string, params url.Values, fileField string, filenames []string) (bool, error, string) {
-	if len(MailApiKey) == 0 || len(MailApiUser) == 0 {
+func (this *Client) doRequestWithFile(url string, params url.Values, fileField string, filenames []string) (bool, error, string) {
+	if len(this.apiKey) == 0 || len(this.apiUser) == 0 {
 		return false, errors.New("请先配置 api 信息"), ""
 	}
 
-	params.Add("apiUser", MailApiUser)
-	params.Add("apiKey", MailApiKey)
+	params.Add("apiUser", this.apiUser)
+	params.Add("apiKey", this.apiKey)
 
 	var body = &bytes.Buffer{}
 	var writer = multipart.NewWriter(body)
@@ -251,6 +255,6 @@ func doRequestWithFile(url string, params url.Values, fileField string, filename
 
 	var result map[string]interface{}
 	err = json.Unmarshal(bodyByte, &result)
-	return (result["result"] == true), err, string(bodyByte)
+	return result["result"] == true, err, string(bodyByte)
 
 }

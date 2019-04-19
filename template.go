@@ -1,16 +1,16 @@
 package sendcloud
 
 import (
-	"net/url"
 	"fmt"
+	"net/url"
 )
 
 const (
-	SEND_CLOUD_TEMPLATE_LIST_API_URL   = "http://api.sendcloud.net/apiv2/template/list"
-	SEND_CLOUD_TEMPLATE_GET_API_URL    = "http://api.sendcloud.net/apiv2/template/get"
-	SEND_CLOUD_TEMPLATE_ADD_API_URL    = "http://api.sendcloud.net/apiv2/template/add"
-	SEND_CLOUD_TEMPLATE_DELETE_API_URL = "http://api.sendcloud.net/apiv2/template/delete"
-	SEND_CLOUD_TEMPLATE_UPDATE_API_URL = "http://api.sendcloud.net/apiv2/template/update"
+	kTemplateList   = "http://api.sendcloud.net/apiv2/template/list"
+	kTemplateGet    = "http://api.sendcloud.net/apiv2/template/get"
+	kTemplateAdd    = "http://api.sendcloud.net/apiv2/template/add"
+	kTemplateDelete = "http://api.sendcloud.net/apiv2/template/delete"
+	kTemplateUpdate = "http://api.sendcloud.net/apiv2/template/update"
 )
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -22,25 +22,25 @@ const (
 // limit        int     否   查询个数, 取值区间 [0-100], 默认为 100
 
 const (
-	SEND_CLOUD_TEMPLATE_TYPE_OF_ALL     = -1
-	SEND_CLOUD_TEMPLATE_TYPE_OF_TRIGGER = 0
-	SEND_CLOUD_TEMPLATE_TYPE_OF_BATCH   = 1
+	TEMPLATE_TYPE_OF_ALL     = -1
+	TEMPLATE_TYPE_OF_TRIGGER = 0
+	TEMPLATE_TYPE_OF_BATCH   = 1
 )
 
 const (
-	SEND_CLOUD_TEMPLATE_STATE_OF_ALL        = -3
-	SEND_CLOUD_TEMPLATE_STATE_OF_NOT_REVIEW = -2   // 未提交审核
-	SEND_CLOUD_TEMPLATE_STATE_OF_NOT_PASS   = -1   // 审核不通过
-	SEND_CLOUD_TEMPLATE_STATE_OF_REVIEWING  = 0    // 待审核
-	SEND_CLOUD_TEMPLATE_STATE_OF_PASSED     = 1    // 审核通过
+	TEMPLATE_STATE_OF_ALL        = -3
+	TEMPLATE_STATE_OF_NOT_REVIEW = -2 // 未提交审核
+	TEMPLATE_STATE_OF_NOT_PASS   = -1 // 审核不通过
+	TEMPLATE_STATE_OF_REVIEWING  = 0  // 待审核
+	TEMPLATE_STATE_OF_PASSED     = 1  // 审核通过
 )
 
-func GetTemplateList(invokeName string, templateType, templateStat, start, limit int) (bool, error, string) {
+func (this *Client) GetTemplateList(invokeName string, templateType, templateStat, start, limit int) (bool, error, string) {
 	params := url.Values{}
-	if templateType != SEND_CLOUD_TEMPLATE_TYPE_OF_ALL {
+	if templateType != TEMPLATE_TYPE_OF_ALL {
 		params.Add("templateType", fmt.Sprintf("%d", templateType))
 	}
-	if templateStat != SEND_CLOUD_TEMPLATE_STATE_OF_ALL {
+	if templateStat != TEMPLATE_STATE_OF_ALL {
 		params.Add("templateStat", fmt.Sprintf("%d", templateStat))
 	}
 	if start >= 0 {
@@ -54,16 +54,16 @@ func GetTemplateList(invokeName string, templateType, templateStat, start, limit
 		params.Add("invokeName", invokeName)
 	}
 
-	return doRequest(SEND_CLOUD_TEMPLATE_LIST_API_URL, params)
+	return this.doRequest(kTemplateList, params)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // GetTemplate 查询模板的详细信息
 // invokeName   string   是    邮件模板调用名称
-func GetTemplate(invokeName string) (bool, error, string) {
+func (this *Client) GetTemplate(invokeName string) (bool, error, string) {
 	params := url.Values{}
 	params.Add("invokeName", invokeName)
-	return doRequest(SEND_CLOUD_TEMPLATE_GET_API_URL, params)
+	return this.doRequest(kTemplateGet, params)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +74,7 @@ func GetTemplate(invokeName string) (bool, error, string) {
 // subject        string    是   模板标题
 // templateType   int       是   邮件模板类型: 0(触发), 1(批量)
 // isSubmitAudit  int       否   是否提交审核: 0(不提交审核), 1(提交审核). 默认为 1
-func AddTemplate(invokeName, name, html, subject string, templateType int, isSubmitAudit bool) (bool, error, string) {
+func (this *Client) AddTemplate(invokeName, name, html, subject string, templateType int, isSubmitAudit bool) (bool, error, string) {
 	params := url.Values{}
 	params.Add("invokeName", invokeName)
 	params.Add("name", name)
@@ -86,16 +86,16 @@ func AddTemplate(invokeName, name, html, subject string, templateType int, isSub
 	} else {
 		params.Add("isSubmitAudit", "0")
 	}
-	return doRequest(SEND_CLOUD_TEMPLATE_ADD_API_URL, params)
+	return this.doRequest(kTemplateAdd, params)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // DeleteTemplate 删除模板
 // invokeName     string    是   邮件模板调用名称
-func DeleteTemplate(invokeName string) (bool, error, string) {
+func (this *Client) DeleteTemplate(invokeName string) (bool, error, string) {
 	params := url.Values{}
 	params.Add("invokeName", invokeName)
-	return doRequest(SEND_CLOUD_TEMPLATE_DELETE_API_URL, params)
+	return this.doRequest(kTemplateDelete, params)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -106,7 +106,7 @@ func DeleteTemplate(invokeName string) (bool, error, string) {
 // subject        string   否  模板标题
 // templateType   int      否  邮件模板类型: 0(触发), 1(批量)
 // isSubmitAudit  int      否  是否提交审核: 0(不提交审核), 1(提交审核). 默认为 1
-func UpdateTemplate(invokeName, name, html, subject string, templateType int, isSubmitAudit bool) (bool, error, string) {
+func (this *Client) UpdateTemplate(invokeName, name, html, subject string, templateType int, isSubmitAudit bool) (bool, error, string) {
 	params := url.Values{}
 	params.Add("invokeName", invokeName)
 	params.Add("name", name)
@@ -118,5 +118,5 @@ func UpdateTemplate(invokeName, name, html, subject string, templateType int, is
 	} else {
 		params.Add("isSubmitAudit", "0")
 	}
-	return doRequest(SEND_CLOUD_TEMPLATE_UPDATE_API_URL, params)
+	return this.doRequest(kTemplateUpdate, params)
 }
