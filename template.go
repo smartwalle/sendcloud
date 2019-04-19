@@ -13,7 +13,29 @@ const (
 	kTemplateUpdate = "http://api.sendcloud.net/apiv2/template/update"
 )
 
-////////////////////////////////////////////////////////////////////////////////
+type Template struct {
+	GMTCreated     string `json:"gmtCreated"`
+	GMTtUpdated    string `json:"gmtUpdated"`
+	Name           string `json:"name"`
+	InvokeName     string `json:"invokeName"`
+	TemplateType   int    `json:"templateType"`
+	HTML           string `json:"html"`
+	Subject        string `json:"subject"`
+	ContentSummary string `json:"contentSummary"`
+}
+
+// --------------------------------------------------------------------------------
+type TemplateListRsp struct {
+	Result     bool   `json:"result"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Info       struct {
+		DataList []*Template `json:"dataList"`
+		Total    int         `json:"total"`
+		Count    int         `json:"count"`
+	} `json:"info"`
+}
+
 // GetTemplateList 查询(批量查询)邮件模板
 // invokeNam    string  否   邮件模板调用名称
 // templateType int     否   邮件模板类型: 0(触发), 1(批量)
@@ -35,7 +57,7 @@ const (
 	TEMPLATE_STATE_OF_PASSED     = 1  // 审核通过
 )
 
-func (this *Client) GetTemplateList(invokeName string, templateType, templateStat, start, limit int) (bool, error, string) {
+func (this *Client) GetTemplateList(invokeName string, templateType, templateStat, start, limit int) (result *TemplateListRsp, err error) {
 	params := url.Values{}
 	if templateType != TEMPLATE_TYPE_OF_ALL {
 		params.Add("templateType", fmt.Sprintf("%d", templateType))
@@ -54,19 +76,39 @@ func (this *Client) GetTemplateList(invokeName string, templateType, templateSta
 		params.Add("invokeName", invokeName)
 	}
 
-	return this.doRequest(kTemplateList, params)
+	err = this.doRequest(kTemplateList, params, &result)
+	return result, err
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------------
+type GetTemplateRso struct {
+	Result     bool   `json:"result"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Info       struct {
+		Data *Template `json:"data"`
+	} `json:"info"`
+}
+
 // GetTemplate 查询模板的详细信息
 // invokeName   string   是    邮件模板调用名称
-func (this *Client) GetTemplate(invokeName string) (bool, error, string) {
+func (this *Client) GetTemplate(invokeName string) (result *GetTemplateRso, err error) {
 	params := url.Values{}
 	params.Add("invokeName", invokeName)
-	return this.doRequest(kTemplateGet, params)
+	err = this.doRequest(kTemplateGet, params, &result)
+	return result, err
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------------
+type AddTemplateRsp struct {
+	Result     bool   `json:"result"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Info       struct {
+		Data *Template `json:"data"`
+	} `json:"info"`
+}
+
 // AddTemplate 添加模板
 // invokeName     string    是   邮件模板调用名称
 // name           string    是   邮件模板名称
@@ -74,7 +116,7 @@ func (this *Client) GetTemplate(invokeName string) (bool, error, string) {
 // subject        string    是   模板标题
 // templateType   int       是   邮件模板类型: 0(触发), 1(批量)
 // isSubmitAudit  int       否   是否提交审核: 0(不提交审核), 1(提交审核). 默认为 1
-func (this *Client) AddTemplate(invokeName, name, html, subject string, templateType int, isSubmitAudit bool) (bool, error, string) {
+func (this *Client) AddTemplate(invokeName, name, html, subject string, templateType int, isSubmitAudit bool) (result *AddTemplateRsp, err error) {
 	params := url.Values{}
 	params.Add("invokeName", invokeName)
 	params.Add("name", name)
@@ -86,19 +128,39 @@ func (this *Client) AddTemplate(invokeName, name, html, subject string, template
 	} else {
 		params.Add("isSubmitAudit", "0")
 	}
-	return this.doRequest(kTemplateAdd, params)
+	err = this.doRequest(kTemplateAdd, params, &result)
+	return result, err
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------------
+type DeleteTemplateRsp struct {
+	Result     bool   `json:"result"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Info       struct {
+		Count int `json:"count"`
+	} `json:"info"`
+}
+
 // DeleteTemplate 删除模板
 // invokeName     string    是   邮件模板调用名称
-func (this *Client) DeleteTemplate(invokeName string) (bool, error, string) {
+func (this *Client) DeleteTemplate(invokeName string) (result *DeleteTemplateRsp, err error) {
 	params := url.Values{}
 	params.Add("invokeName", invokeName)
-	return this.doRequest(kTemplateDelete, params)
+	err = this.doRequest(kTemplateDelete, params, &result)
+	return result, err
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------------
+type UpdateTemplateRsp struct {
+	Result     bool   `json:"result"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Info       struct {
+		Count int `json:"count"`
+	} `json:"info"`
+}
+
 // UpdateTemplate 修改模板信息
 // invokeName     string   是  邮件模板调用名称
 // name           string   否  邮件模板名称
@@ -106,7 +168,7 @@ func (this *Client) DeleteTemplate(invokeName string) (bool, error, string) {
 // subject        string   否  模板标题
 // templateType   int      否  邮件模板类型: 0(触发), 1(批量)
 // isSubmitAudit  int      否  是否提交审核: 0(不提交审核), 1(提交审核). 默认为 1
-func (this *Client) UpdateTemplate(invokeName, name, html, subject string, templateType int, isSubmitAudit bool) (bool, error, string) {
+func (this *Client) UpdateTemplate(invokeName, name, html, subject string, templateType int, isSubmitAudit bool) (result *UpdateTemplateRsp, err error) {
 	params := url.Values{}
 	params.Add("invokeName", invokeName)
 	params.Add("name", name)
@@ -118,5 +180,6 @@ func (this *Client) UpdateTemplate(invokeName, name, html, subject string, templ
 	} else {
 		params.Add("isSubmitAudit", "0")
 	}
-	return this.doRequest(kTemplateUpdate, params)
+	err = this.doRequest(kTemplateUpdate, params, &result)
+	return result, err
 }

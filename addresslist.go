@@ -17,12 +17,41 @@ const (
 	kAddressMemberDelete = "http://api.sendcloud.net/apiv2/addressmember/delete"
 )
 
-////////////////////////////////////////////////////////////////////////////////
+type Address struct {
+	GMTCreated  string `json:"gmtCreated"`
+	GMTtUpdated string `json:"gmtUpdated"`
+	Address     string `json:"address"`
+	MemberCount int    `json:"memberCount"`
+	Description string `json:"description"`
+	Name        string `json:"name"`
+	ListType    int    `json:"listType"`
+}
+
+type Member struct {
+	GMTCreated  string `json:"gmtCreated"`
+	GMTtUpdated string `json:"gmtUpdated"`
+	Member      string `json:"member"`
+	Name        string `json:"name"`
+	Address     string `json:"address"`
+}
+
+// --------------------------------------------------------------------------------
+type AddressListRsp struct {
+	Result     bool   `json:"result"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Info       struct {
+		DataList []*Address `json:"dataList"`
+		Total    int        `json:"total"`
+		Count    int        `json:"count"`
+	} `json:"info"`
+}
+
 // GetAddressList 查询地址列表(批量查询)
 //address  list 否  别名地址的列表, 多个用 ; 分隔
 //start    int  否  查询起始位置, 取值区间 [0-], 默认为 0
 //limit    int  否  查询个数, 取值区间 [0-100], 默认为 100
-func (this *Client) GetAddressList(address string, start, limit int) (bool, error, string) {
+func (this *Client) GetAddressList(address string, start, limit int) (result *AddressListRsp, err error) {
 	params := url.Values{}
 	if len(address) > 0 {
 		params.Add("address", address)
@@ -33,54 +62,96 @@ func (this *Client) GetAddressList(address string, start, limit int) (bool, erro
 	if limit >= 1 {
 		params.Add("limit", fmt.Sprintf("%d", limit))
 	}
-	return this.doRequest(kAddressListList, params)
+	err = this.doRequest(kAddressListList, params, &result)
+	return result, err
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------------
+type AddAddressListRsp struct {
+	Result     bool   `json:"result"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Info       struct {
+		Data *Address `json:"data"`
+	} `json:"info"`
+}
+
 // AddAddressList 添加地址列表
 //address  string   是    别称地址, 使用该别称地址进行调用, 格式为xxx@maillist.sendcloud.org
 //name     string   是    列表名称
 //desc     string   否    对列表的描述信息
 //listType int      否    列表的类型. 0: 普通地址列表, 1: 高级地址列表(需要开通权限才能使用). 默认为0
-func (this *Client) AddAddressList(address, name, desc string /*, listType int*/) (bool, error, string) {
+func (this *Client) AddAddressList(address, name, desc string /*, listType int*/) (result *AddAddressListRsp, err error) {
 	params := url.Values{}
 	params.Add("address", address)
 	params.Add("name", name)
 	params.Add("desc", desc)
 	//params.Add("listType", fmt.Sprintf("%d", listType))
-	return this.doRequest(kAddressListAdd, params)
+	err = this.doRequest(kAddressListAdd, params, &result)
+	return result, err
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------------
+type DeleteAddressListRsp struct {
+	Result     bool   `json:"result"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Info       struct {
+		Count int `json:"count"`
+	} `json:"info"`
+}
+
 // DeleteAddressList 删除地址列表
 // address  string  是   别称地址, 使用该别称地址进行调用, 格式为xxx@maillist.sendcloud.org
-func (this *Client) DeleteAddressList(address string) (bool, error, string) {
+func (this *Client) DeleteAddressList(address string) (result *DeleteAddressListRsp, err error) {
 	params := url.Values{}
 	params.Add("address", address)
-	return this.doRequest(kAddressListDelete, params)
+	err = this.doRequest(kAddressListDelete, params, &result)
+	return result, err
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------------
+type UpdateAddressListRsp struct {
+	Result     bool   `json:"result"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Info       struct {
+		Count int `json:"count"`
+	} `json:"info"`
+}
+
 // UpdateAddressList 更新地址列表
 // address     string   是    别称地址, 使用该别称地址进行调用, 格式为xxx@maillist.sendcloud.org
 // newAddress  string   否    修改后的别称地址
 // name        string   否    修改后的列表名称
 // desc        string   否    修改后的列表描述信息
-func (this *Client) UpdateAddressList(address, newAddress, name, desc string) (bool, error, string) {
+func (this *Client) UpdateAddressList(address, newAddress, name, desc string) (result *UpdateAddressListRsp, err error) {
 	params := url.Values{}
 	params.Add("address", address)
 	params.Add("newAddress", newAddress)
 	params.Add("name", name)
 	params.Add("desc", desc)
-	return this.doRequest(kAddressListUpdate, params)
+	err = this.doRequest(kAddressListUpdate, params, &result)
+	return result, err
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------------
+type AddressMemberListRsp struct {
+	Result     bool   `json:"result"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Info       struct {
+		DataList []*Member `json:"dataList"`
+		Total    int       `json:"total"`
+		Count    int       `json:"count"`
+	} `json:"info"`
+}
+
 // GetAddressMemberList 获取邮件列表的成员列表
 // address string 是 地址列表的别称地址
 // start   int    否 查询起始位置, 取值区间 [0-], 默认为 0
 // limit   int    否 查询个数, 取值区间 [0-100], 默认为 100
-func (this *Client) GetAddressMemberList(address string, start, limit int) (bool, error, string) {
+func (this *Client) GetAddressMemberList(address string, start, limit int) (result *AddressMemberListRsp, err error) {
 	params := url.Values{}
 	params.Add("address", address)
 	if start >= 0 {
@@ -89,46 +160,77 @@ func (this *Client) GetAddressMemberList(address string, start, limit int) (bool
 	if limit >= 1 {
 		params.Add("limit", fmt.Sprintf("%d", limit))
 	}
-	return this.doRequest(kAddressMemberList, params)
+	err = this.doRequest(kAddressMemberList, params, &result)
+	return result, err
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------------
+type AddAddressMemberRsp struct {
+	Result     bool   `json:"result"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Info       struct {
+		Count int `json:"count"`
+	} `json:"info"`
+}
+
 // AddAddressMember 向地址列表添加成员
 // address string  是   地址列表的别称地址
 // members list    是   需要添加成员的地址, 多个地址用 ; 分隔
 // names   list	   否   地址成员姓名, 多个地址用 ; 分隔
-func (this *Client) AddAddressMember(address string, members, names []string) (bool, error, string) {
+func (this *Client) AddAddressMember(address string, members, names []string) (result *AddAddressMemberRsp, err error) {
 	params := url.Values{}
 	params.Add("address", address)
 	params.Add("members", strings.Join(members, ";"))
-	if names != nil && len(names) > 0 {
+	if len(names) > 0 {
 		params.Add("names", strings.Join(names, ";"))
 	}
-	return this.doRequest(kAddressMemberAdd, params)
+	err = this.doRequest(kAddressMemberAdd, params, &result)
+	return result, err
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------------
+type UpdateAddressMemberRsp struct {
+	Result     bool   `json:"result"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Info       struct {
+		Count int `json:"count"`
+	} `json:"info"`
+}
+
 // UpdateAddressMember 修改邮件列表的成员
 // address  string 是  地址列表的别称地址
 // members  list   是  需要添加成员的地址, 多个地址用 ; 分隔
 // names    list   否  地址成员姓名, 多个地址用 ; 分隔
-func (this *Client) UpdateAddressMember(address string, members, names []string) (bool, error, string) {
+func (this *Client) UpdateAddressMember(address string, members, names []string) (result *UpdateAddressMemberRsp, err error) {
 	params := url.Values{}
 	params.Add("address", address)
 	params.Add("members", strings.Join(members, ";"))
-	if names != nil && len(names) > 0 {
+	if len(names) > 0 {
 		params.Add("names", strings.Join(names, ";"))
 	}
-	return this.doRequest(kAddressMemberUpdate, params)
+	err = this.doRequest(kAddressMemberUpdate, params, &result)
+	return result, err
 }
 
-////////////////////////////////////////////////////////////////////////////////
+// --------------------------------------------------------------------------------
+type DeleteAddressMemberRsp struct {
+	Result     bool   `json:"result"`
+	StatusCode int    `json:"statusCode"`
+	Message    string `json:"message"`
+	Info       struct {
+		Count int `json:"count"`
+	} `json:"info"`
+}
+
 // DeleteAddressMember 从邮件列表删除成员
 // address string  是  地址列表的别称地址
 // members list    是  需要删除成员的地址, 多个地址用 ; 分隔
-func (this *Client) DeleteAddressMember(address string, members []string) (bool, error, string) {
+func (this *Client) DeleteAddressMember(address string, members []string) (result *DeleteAddressMemberRsp, err error) {
 	params := url.Values{}
 	params.Add("address", address)
 	params.Add("members", strings.Join(members, ";"))
-	return this.doRequest(kAddressMemberDelete, params)
+	err = this.doRequest(kAddressMemberDelete, params, &result)
+	return result, err
 }
