@@ -28,8 +28,25 @@ type SendTemplateRsp struct {
 }
 
 type To struct {
-	To    string
-	Param map[string]string
+	toList map[string]map[string]string
+}
+
+func NewTo() *To {
+	var tl = &To{}
+	tl.toList = make(map[string]map[string]string)
+	return tl
+}
+
+func (this *To) Add(to string, param map[string]string) {
+	this.toList[to] = param
+}
+
+func (this *To) Del(to string) {
+	delete(this.toList, to)
+}
+
+func (this *To) Len() int {
+	return len(this.toList)
 }
 
 // SendMailWithTemplate 模板发送
@@ -38,22 +55,25 @@ type To struct {
 // fromName     string 否   发件人名称
 // replyTo      string 否   设置用户默认的回复邮件地址. 如果 replyTo 没有或者为空, 则默认的回复邮件地址为 from
 // subject      string *    邮件标题
-func (this *Client) SendTemplateMail(invokeName, from, fromName, replyTo, subject string, toList []*To, filename []string) (result *SendTemplateRsp, err error) {
+func (this *Client) SendTemplateMail(to *To, invokeName, from, fromName, replyTo, subject string, filename []string) (result *SendTemplateRsp, err error) {
 	var toMap = map[string]interface{}{}
-	var toMailList = make([]string, len(toList))
+	var mailList = make([]string, to.Len())
 	var sub = map[string][]string{}
 
-	for index, item := range toList {
-		toMailList[index] = item.To
+	var index = 0
+	for addr, param := range to.toList {
+		mailList[index] = addr
 
-		for key, value := range item.Param {
+		for key, value := range param {
 			if _, ok := sub[key]; !ok {
-				sub[key] = make([]string, len(toList))
+				sub[key] = make([]string, to.Len())
 			}
 			sub[key][index] = value
 		}
+
+		index++
 	}
-	toMap["to"] = toMailList
+	toMap["to"] = mailList
 	if len(sub) > 0 {
 		toMap["sub"] = sub
 	}
