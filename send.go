@@ -2,6 +2,7 @@ package sendcloud
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/url"
 )
@@ -93,7 +94,14 @@ func (this *Client) SendTemplateMail(to *To, invokeName, from, fromName, replyTo
 		"xsmtpapi":           {substitutionVars},
 	}
 
-	err = this.doRequestWithFile(kSendTemplate, params, "attachments", filename, &result)
+	if err = this.doRequestWithFile(kSendTemplate, params, "attachments", filename, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }
 
@@ -115,7 +123,14 @@ func (this *Client) SendTemplateMailToAddressList(addressList, invokeName, from,
 		"templateInvokeName": {invokeName},
 		"useAddressList":     {"true"},
 	}
-	err = this.doRequestWithFile(kSendTemplate, params, "attachments", filename, &result)
+	if err = this.doRequestWithFile(kSendTemplate, params, "attachments", filename, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }
 
@@ -134,6 +149,14 @@ type GetTaskInfoRsp struct {
 func (this *Client) GetTaskInfo(mailListTaskId int) (result *GetTaskInfoRsp, err error) {
 	params := url.Values{}
 	params.Add("maillistTaskId", fmt.Sprintf("%d", mailListTaskId))
-	err = this.doRequest(kMailTaskInfo, params, &result)
+
+	if err = this.doRequest(kMailTaskInfo, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }

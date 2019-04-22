@@ -1,6 +1,10 @@
 package sendcloud
 
-import "net/url"
+import (
+	"errors"
+	"fmt"
+	"net/url"
+)
 
 const (
 	kUserInfoGet = "http://api.sendcloud.net/apiv2/userinfo/get"
@@ -32,6 +36,14 @@ type UserInfoRsp struct {
 // GetUserInfo 查询当前用户的相关信息
 func (this *Client) GetUserInfo() (result *UserInfoRsp, err error) {
 	params := url.Values{}
-	err = this.doRequest(kUserInfoGet, params, &result)
+
+	if err = this.doRequest(kUserInfoGet, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }

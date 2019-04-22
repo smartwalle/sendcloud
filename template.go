@@ -1,6 +1,7 @@
 package sendcloud
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 )
@@ -76,7 +77,14 @@ func (this *Client) GetTemplateList(invokeName string, templateType, templateSta
 		params.Add("invokeName", invokeName)
 	}
 
-	err = this.doRequest(kTemplateList, params, &result)
+	if err = this.doRequest(kTemplateList, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }
 
@@ -95,7 +103,15 @@ type GetTemplateRso struct {
 func (this *Client) GetTemplate(invokeName string) (result *GetTemplateRso, err error) {
 	params := url.Values{}
 	params.Add("invokeName", invokeName)
-	err = this.doRequest(kTemplateGet, params, &result)
+
+	if err = this.doRequest(kTemplateGet, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }
 
@@ -128,7 +144,15 @@ func (this *Client) AddTemplate(invokeName, name, html, subject string, template
 	} else {
 		params.Add("isSubmitAudit", "0")
 	}
-	err = this.doRequest(kTemplateAdd, params, &result)
+
+	if err = this.doRequest(kTemplateAdd, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }
 
@@ -147,7 +171,15 @@ type DeleteTemplateRsp struct {
 func (this *Client) DeleteTemplate(invokeName string) (result *DeleteTemplateRsp, err error) {
 	params := url.Values{}
 	params.Add("invokeName", invokeName)
-	err = this.doRequest(kTemplateDelete, params, &result)
+
+	if err = this.doRequest(kTemplateDelete, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }
 
@@ -180,6 +212,14 @@ func (this *Client) UpdateTemplate(invokeName, name, html, subject string, templ
 	} else {
 		params.Add("isSubmitAudit", "0")
 	}
-	err = this.doRequest(kTemplateUpdate, params, &result)
+
+	if err = this.doRequest(kTemplateUpdate, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }

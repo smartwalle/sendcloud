@@ -1,6 +1,7 @@
 package sendcloud
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"strings"
@@ -62,7 +63,15 @@ func (this *Client) GetAddressList(address string, start, limit int) (result *Ad
 	if limit >= 1 {
 		params.Add("limit", fmt.Sprintf("%d", limit))
 	}
-	err = this.doRequest(kAddressListList, params, &result)
+
+	if err = this.doRequest(kAddressListList, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }
 
@@ -87,7 +96,15 @@ func (this *Client) AddAddressList(address, name, desc string /*, listType int*/
 	params.Add("name", name)
 	params.Add("desc", desc)
 	//params.Add("listType", fmt.Sprintf("%d", listType))
-	err = this.doRequest(kAddressListAdd, params, &result)
+
+	if err = this.doRequest(kAddressListAdd, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }
 
@@ -106,7 +123,15 @@ type DeleteAddressListRsp struct {
 func (this *Client) DeleteAddressList(address string) (result *DeleteAddressListRsp, err error) {
 	params := url.Values{}
 	params.Add("address", address)
-	err = this.doRequest(kAddressListDelete, params, &result)
+
+	if err = this.doRequest(kAddressListDelete, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }
 
@@ -131,7 +156,15 @@ func (this *Client) UpdateAddressList(address, newAddress, name, desc string) (r
 	params.Add("newAddress", newAddress)
 	params.Add("name", name)
 	params.Add("desc", desc)
-	err = this.doRequest(kAddressListUpdate, params, &result)
+
+	if err = this.doRequest(kAddressListUpdate, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }
 
@@ -160,7 +193,15 @@ func (this *Client) GetAddressMemberList(address string, start, limit int) (resu
 	if limit >= 1 {
 		params.Add("limit", fmt.Sprintf("%d", limit))
 	}
-	err = this.doRequest(kAddressMemberList, params, &result)
+
+	if err = this.doRequest(kAddressMemberList, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }
 
@@ -185,7 +226,15 @@ func (this *Client) AddAddressMember(address string, members, names []string) (r
 	if len(names) > 0 {
 		params.Add("names", strings.Join(names, ";"))
 	}
-	err = this.doRequest(kAddressMemberAdd, params, &result)
+
+	if err = this.doRequest(kAddressMemberAdd, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }
 
@@ -210,7 +259,15 @@ func (this *Client) UpdateAddressMember(address string, members, names []string)
 	if len(names) > 0 {
 		params.Add("names", strings.Join(names, ";"))
 	}
-	err = this.doRequest(kAddressMemberUpdate, params, &result)
+
+	if err = this.doRequest(kAddressMemberUpdate, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }
 
@@ -231,6 +288,14 @@ func (this *Client) DeleteAddressMember(address string, members []string) (resul
 	params := url.Values{}
 	params.Add("address", address)
 	params.Add("members", strings.Join(members, ";"))
-	err = this.doRequest(kAddressMemberDelete, params, &result)
+
+	if err = this.doRequest(kAddressMemberDelete, params, &result); err != nil {
+		return nil, err
+	}
+
+	if result.Result == false {
+		return nil, errors.New(fmt.Sprintf("%d-%s", result.StatusCode, result.Message))
+	}
+
 	return result, err
 }
