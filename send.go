@@ -85,7 +85,7 @@ func (this *Client) SendTemplateMail(to *To, invokeName, from, fromName, replyTo
 	}
 
 	var substitutionVars = string(substitutionVarsBytes)
-	params := url.Values{
+	param := url.Values{
 		"from":               {from},
 		"fromName":           {fromName},
 		"replyTo":            {replyTo},
@@ -94,7 +94,7 @@ func (this *Client) SendTemplateMail(to *To, invokeName, from, fromName, replyTo
 		"xsmtpapi":           {substitutionVars},
 	}
 
-	if err = this.doRequestWithFile(kSendTemplate, params, "attachments", filename, &result); err != nil {
+	if err = this.doRequestWithFile(kSendTemplate, param, "attachments", filename, &result); err != nil {
 		return nil, err
 	}
 
@@ -114,7 +114,7 @@ func (this *Client) SendTemplateMail(to *To, invokeName, from, fromName, replyTo
 // replyTo      string 否   设置用户默认的回复邮件地址. 如果 replyTo 没有或者为空, 则默认的回复邮件地址为 from
 // subject      string *    邮件标题
 func (this *Client) SendTemplateMailToAddressList(addressList, invokeName, from, fromName, replyTo, subject string, filename []string) (result *SendTemplateRsp, err error) {
-	params := url.Values{
+	param := url.Values{
 		"to":                 {addressList},
 		"from":               {from},
 		"fromName":           {fromName},
@@ -123,7 +123,7 @@ func (this *Client) SendTemplateMailToAddressList(addressList, invokeName, from,
 		"templateInvokeName": {invokeName},
 		"useAddressList":     {"true"},
 	}
-	if err = this.doRequestWithFile(kSendTemplate, params, "attachments", filename, &result); err != nil {
+	if err = this.doRequestWithFile(kSendTemplate, param, "attachments", filename, &result); err != nil {
 		return nil, err
 	}
 
@@ -147,10 +147,10 @@ type GetTaskInfoRsp struct {
 // GetTaskInfo 获取邮件地址列表发送任务信息
 // mailListTaskId   int  是  返回的mailListTaskId
 func (this *Client) GetTaskInfo(mailListTaskId int) (result *GetTaskInfoRsp, err error) {
-	params := url.Values{}
-	params.Add("maillistTaskId", fmt.Sprintf("%d", mailListTaskId))
+	param := url.Values{}
+	param.Add("maillistTaskId", fmt.Sprintf("%d", mailListTaskId))
 
-	if err = this.doRequest(kMailTaskInfo, params, &result); err != nil {
+	if err = this.doRequest(kMailTaskInfo, param, &result); err != nil {
 		return nil, err
 	}
 

@@ -49,25 +49,25 @@ type EmailStatusListRsp struct {
 //start    int  否  查询起始位置, 取值区间 [0-], 默认为 0
 //limit    int  否  查询个数, 取值区间 [0-100], 默认为 100
 func (this *Client) GetEmailStatusList(days int, startDate, endDate string, start, limit int) (result *EmailStatusListRsp, err error) {
-	params := url.Values{}
+	param := url.Values{}
 
 	if days > 0 {
-		params.Add("days", fmt.Sprintf("%d", days))
+		param.Add("days", fmt.Sprintf("%d", days))
 	}
 	if startDate != "" {
-		params.Set("startDate", startDate)
+		param.Set("startDate", startDate)
 	}
 	if endDate != "" {
-		params.Set("endDate", endDate)
+		param.Set("endDate", endDate)
 	}
 	if start >= 0 {
-		params.Add("start", fmt.Sprintf("%d", start))
+		param.Add("start", fmt.Sprintf("%d", start))
 	}
 	if limit >= 1 {
-		params.Add("limit", fmt.Sprintf("%d", limit))
+		param.Add("limit", fmt.Sprintf("%d", limit))
 	}
 
-	if err = this.doRequest(kEmailStatus, params, &result); err != nil {
+	if err = this.doRequest(kEmailStatus, param, &result); err != nil {
 		return nil, err
 	}
 

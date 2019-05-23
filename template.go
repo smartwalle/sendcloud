@@ -59,25 +59,25 @@ const (
 )
 
 func (this *Client) GetTemplateList(invokeName string, templateType, templateStat, start, limit int) (result *TemplateListRsp, err error) {
-	params := url.Values{}
+	param := url.Values{}
 	if templateType != TEMPLATE_TYPE_OF_ALL {
-		params.Add("templateType", fmt.Sprintf("%d", templateType))
+		param.Add("templateType", fmt.Sprintf("%d", templateType))
 	}
 	if templateStat != TEMPLATE_STATE_OF_ALL {
-		params.Add("templateStat", fmt.Sprintf("%d", templateStat))
+		param.Add("templateStat", fmt.Sprintf("%d", templateStat))
 	}
 	if start >= 0 {
-		params.Add("start", fmt.Sprintf("%d", start))
+		param.Add("start", fmt.Sprintf("%d", start))
 	}
 	if limit >= 1 {
-		params.Add("limit", fmt.Sprintf("%d", limit))
+		param.Add("limit", fmt.Sprintf("%d", limit))
 	}
 
 	if len(invokeName) > 0 {
-		params.Add("invokeName", invokeName)
+		param.Add("invokeName", invokeName)
 	}
 
-	if err = this.doRequest(kTemplateList, params, &result); err != nil {
+	if err = this.doRequest(kTemplateList, param, &result); err != nil {
 		return nil, err
 	}
 
@@ -101,10 +101,10 @@ type GetTemplateRso struct {
 // GetTemplate 查询模板的详细信息
 // invokeName   string   是    邮件模板调用名称
 func (this *Client) GetTemplate(invokeName string) (result *GetTemplateRso, err error) {
-	params := url.Values{}
-	params.Add("invokeName", invokeName)
+	param := url.Values{}
+	param.Add("invokeName", invokeName)
 
-	if err = this.doRequest(kTemplateGet, params, &result); err != nil {
+	if err = this.doRequest(kTemplateGet, param, &result); err != nil {
 		return nil, err
 	}
 
@@ -133,19 +133,19 @@ type AddTemplateRsp struct {
 // templateType   int       是   邮件模板类型: 0(触发), 1(批量)
 // isSubmitAudit  int       否   是否提交审核: 0(不提交审核), 1(提交审核). 默认为 1
 func (this *Client) AddTemplate(invokeName, name, html, subject string, templateType int, isSubmitAudit bool) (result *AddTemplateRsp, err error) {
-	params := url.Values{}
-	params.Add("invokeName", invokeName)
-	params.Add("name", name)
-	params.Add("html", html)
-	params.Add("subject", subject)
-	params.Add("templateType", fmt.Sprintf("%d", templateType))
+	param := url.Values{}
+	param.Add("invokeName", invokeName)
+	param.Add("name", name)
+	param.Add("html", html)
+	param.Add("subject", subject)
+	param.Add("templateType", fmt.Sprintf("%d", templateType))
 	if isSubmitAudit {
-		params.Add("isSubmitAudit", "1")
+		param.Add("isSubmitAudit", "1")
 	} else {
-		params.Add("isSubmitAudit", "0")
+		param.Add("isSubmitAudit", "0")
 	}
 
-	if err = this.doRequest(kTemplateAdd, params, &result); err != nil {
+	if err = this.doRequest(kTemplateAdd, param, &result); err != nil {
 		return nil, err
 	}
 
@@ -169,10 +169,10 @@ type DeleteTemplateRsp struct {
 // DeleteTemplate 删除模板
 // invokeName     string    是   邮件模板调用名称
 func (this *Client) DeleteTemplate(invokeName string) (result *DeleteTemplateRsp, err error) {
-	params := url.Values{}
-	params.Add("invokeName", invokeName)
+	param := url.Values{}
+	param.Add("invokeName", invokeName)
 
-	if err = this.doRequest(kTemplateDelete, params, &result); err != nil {
+	if err = this.doRequest(kTemplateDelete, param, &result); err != nil {
 		return nil, err
 	}
 
@@ -201,19 +201,19 @@ type UpdateTemplateRsp struct {
 // templateType   int      否  邮件模板类型: 0(触发), 1(批量)
 // isSubmitAudit  int      否  是否提交审核: 0(不提交审核), 1(提交审核). 默认为 1
 func (this *Client) UpdateTemplate(invokeName, name, html, subject string, templateType int, isSubmitAudit bool) (result *UpdateTemplateRsp, err error) {
-	params := url.Values{}
-	params.Add("invokeName", invokeName)
-	params.Add("name", name)
-	params.Add("html", html)
-	params.Add("subject", subject)
-	params.Add("templateType", fmt.Sprintf("%d", templateType))
+	param := url.Values{}
+	param.Add("invokeName", invokeName)
+	param.Add("name", name)
+	param.Add("html", html)
+	param.Add("subject", subject)
+	param.Add("templateType", fmt.Sprintf("%d", templateType))
 	if isSubmitAudit {
-		params.Add("isSubmitAudit", "1")
+		param.Add("isSubmitAudit", "1")
 	} else {
-		params.Add("isSubmitAudit", "0")
+		param.Add("isSubmitAudit", "0")
 	}
 
-	if err = this.doRequest(kTemplateUpdate, params, &result); err != nil {
+	if err = this.doRequest(kTemplateUpdate, param, &result); err != nil {
 		return nil, err
 	}
 

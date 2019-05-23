@@ -53,18 +53,18 @@ type AddressListRsp struct {
 //start    int  否  查询起始位置, 取值区间 [0-], 默认为 0
 //limit    int  否  查询个数, 取值区间 [0-100], 默认为 100
 func (this *Client) GetAddressList(address string, start, limit int) (result *AddressListRsp, err error) {
-	params := url.Values{}
+	param := url.Values{}
 	if len(address) > 0 {
-		params.Add("address", address)
+		param.Add("address", address)
 	}
 	if start >= 0 {
-		params.Add("start", fmt.Sprintf("%d", start))
+		param.Add("start", fmt.Sprintf("%d", start))
 	}
 	if limit >= 1 {
-		params.Add("limit", fmt.Sprintf("%d", limit))
+		param.Add("limit", fmt.Sprintf("%d", limit))
 	}
 
-	if err = this.doRequest(kAddressListList, params, &result); err != nil {
+	if err = this.doRequest(kAddressListList, param, &result); err != nil {
 		return nil, err
 	}
 
@@ -91,13 +91,13 @@ type AddAddressListRsp struct {
 //desc     string   否    对列表的描述信息
 //listType int      否    列表的类型. 0: 普通地址列表, 1: 高级地址列表(需要开通权限才能使用). 默认为0
 func (this *Client) AddAddressList(address, name, desc string /*, listType int*/) (result *AddAddressListRsp, err error) {
-	params := url.Values{}
-	params.Add("address", address)
-	params.Add("name", name)
-	params.Add("desc", desc)
-	//params.Add("listType", fmt.Sprintf("%d", listType))
+	param := url.Values{}
+	param.Add("address", address)
+	param.Add("name", name)
+	param.Add("desc", desc)
+	//param.Add("listType", fmt.Sprintf("%d", listType))
 
-	if err = this.doRequest(kAddressListAdd, params, &result); err != nil {
+	if err = this.doRequest(kAddressListAdd, param, &result); err != nil {
 		return nil, err
 	}
 
@@ -121,10 +121,10 @@ type DeleteAddressListRsp struct {
 // DeleteAddressList 删除地址列表
 // address  string  是   别称地址, 使用该别称地址进行调用, 格式为xxx@maillist.sendcloud.org
 func (this *Client) DeleteAddressList(address string) (result *DeleteAddressListRsp, err error) {
-	params := url.Values{}
-	params.Add("address", address)
+	param := url.Values{}
+	param.Add("address", address)
 
-	if err = this.doRequest(kAddressListDelete, params, &result); err != nil {
+	if err = this.doRequest(kAddressListDelete, param, &result); err != nil {
 		return nil, err
 	}
 
@@ -151,13 +151,13 @@ type UpdateAddressListRsp struct {
 // name        string   否    修改后的列表名称
 // desc        string   否    修改后的列表描述信息
 func (this *Client) UpdateAddressList(address, newAddress, name, desc string) (result *UpdateAddressListRsp, err error) {
-	params := url.Values{}
-	params.Add("address", address)
-	params.Add("newAddress", newAddress)
-	params.Add("name", name)
-	params.Add("desc", desc)
+	param := url.Values{}
+	param.Add("address", address)
+	param.Add("newAddress", newAddress)
+	param.Add("name", name)
+	param.Add("desc", desc)
 
-	if err = this.doRequest(kAddressListUpdate, params, &result); err != nil {
+	if err = this.doRequest(kAddressListUpdate, param, &result); err != nil {
 		return nil, err
 	}
 
@@ -185,16 +185,16 @@ type AddressMemberListRsp struct {
 // start   int    否 查询起始位置, 取值区间 [0-], 默认为 0
 // limit   int    否 查询个数, 取值区间 [0-100], 默认为 100
 func (this *Client) GetAddressMemberList(address string, start, limit int) (result *AddressMemberListRsp, err error) {
-	params := url.Values{}
-	params.Add("address", address)
+	param := url.Values{}
+	param.Add("address", address)
 	if start >= 0 {
-		params.Add("start", fmt.Sprintf("%d", start))
+		param.Add("start", fmt.Sprintf("%d", start))
 	}
 	if limit >= 1 {
-		params.Add("limit", fmt.Sprintf("%d", limit))
+		param.Add("limit", fmt.Sprintf("%d", limit))
 	}
 
-	if err = this.doRequest(kAddressMemberList, params, &result); err != nil {
+	if err = this.doRequest(kAddressMemberList, param, &result); err != nil {
 		return nil, err
 	}
 
@@ -220,14 +220,14 @@ type AddAddressMemberRsp struct {
 // members list    是   需要添加成员的地址, 多个地址用 ; 分隔
 // names   list	   否   地址成员姓名, 多个地址用 ; 分隔
 func (this *Client) AddAddressMember(address string, members, names []string) (result *AddAddressMemberRsp, err error) {
-	params := url.Values{}
-	params.Add("address", address)
-	params.Add("members", strings.Join(members, ";"))
+	param := url.Values{}
+	param.Add("address", address)
+	param.Add("members", strings.Join(members, ";"))
 	if len(names) > 0 {
-		params.Add("names", strings.Join(names, ";"))
+		param.Add("names", strings.Join(names, ";"))
 	}
 
-	if err = this.doRequest(kAddressMemberAdd, params, &result); err != nil {
+	if err = this.doRequest(kAddressMemberAdd, param, &result); err != nil {
 		return nil, err
 	}
 
@@ -253,14 +253,14 @@ type UpdateAddressMemberRsp struct {
 // members  list   是  需要添加成员的地址, 多个地址用 ; 分隔
 // names    list   否  地址成员姓名, 多个地址用 ; 分隔
 func (this *Client) UpdateAddressMember(address string, members, names []string) (result *UpdateAddressMemberRsp, err error) {
-	params := url.Values{}
-	params.Add("address", address)
-	params.Add("members", strings.Join(members, ";"))
+	param := url.Values{}
+	param.Add("address", address)
+	param.Add("members", strings.Join(members, ";"))
 	if len(names) > 0 {
-		params.Add("names", strings.Join(names, ";"))
+		param.Add("names", strings.Join(names, ";"))
 	}
 
-	if err = this.doRequest(kAddressMemberUpdate, params, &result); err != nil {
+	if err = this.doRequest(kAddressMemberUpdate, param, &result); err != nil {
 		return nil, err
 	}
 
@@ -285,11 +285,11 @@ type DeleteAddressMemberRsp struct {
 // address string  是  地址列表的别称地址
 // members list    是  需要删除成员的地址, 多个地址用 ; 分隔
 func (this *Client) DeleteAddressMember(address string, members []string) (result *DeleteAddressMemberRsp, err error) {
-	params := url.Values{}
-	params.Add("address", address)
-	params.Add("members", strings.Join(members, ";"))
+	param := url.Values{}
+	param.Add("address", address)
+	param.Add("members", strings.Join(members, ";"))
 
-	if err = this.doRequest(kAddressMemberDelete, params, &result); err != nil {
+	if err = this.doRequest(kAddressMemberDelete, param, &result); err != nil {
 		return nil, err
 	}
 

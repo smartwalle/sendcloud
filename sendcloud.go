@@ -31,14 +31,14 @@ func New(apiUser, apiKey string) *Client {
 
 ////////////////////////////////////////////////////////////////////////////////
 // doRequest 发起网络请求
-func (this *Client) doRequest(url string, params url.Values, result interface{}) error {
+func (this *Client) doRequest(url string, param url.Values, result interface{}) error {
 	if len(this.apiKey) == 0 || len(this.apiUser) == 0 {
 		return errors.New("请先配置 api 信息")
 	}
-	params.Add("apiUser", this.apiUser)
-	params.Add("apiKey", this.apiKey)
+	param.Add("apiUser", this.apiUser)
+	param.Add("apiKey", this.apiKey)
 
-	var body = bytes.NewBufferString(params.Encode())
+	var body = bytes.NewBufferString(param.Encode())
 	rsp, err := http.Post(url, "application/x-www-form-urlencoded", body)
 	if rsp.Body != nil {
 		defer rsp.Body.Close()
@@ -55,18 +55,18 @@ func (this *Client) doRequest(url string, params url.Values, result interface{})
 	return json.Unmarshal(bodyByte, result)
 }
 
-//func doRequestWithFile(url string, params url.Values, fileField string, filenames []string) (bool, error, string) {
+//func doRequestWithFile(url string, param url.Values, fileField string, filenames []string) (bool, error, string) {
 //	if len(apiKey) == 0 || len(apiUser) == 0 {
 //		return false, errors.New("请先配置 api 信息"), ""
 //	}
-//	params.Add("apiUser", apiUser)
-//	params.Add("apiKey", apiKey)
+//	param.Add("apiUser", apiUser)
+//	param.Add("apiKey", apiKey)
 //
 //	var bodyBuf    = bytes.NewBufferString("")
 //	var bodyWriter = multipart.NewWriter(bodyBuf)
 //	defer bodyWriter.Close()
 //
-//	for key, value := range params {
+//	for key, value := range param {
 //		_ = bodyWriter.WriteField(key, value[0])
 //	}
 //
@@ -125,13 +125,13 @@ func (this *Client) doRequest(url string, params url.Values, result interface{})
 //	return (result["result"] == true), err, string(bodyByte)
 //}
 
-func (this *Client) doRequestWithFile(url string, params url.Values, fileField string, filenames []string, result interface{}) error {
+func (this *Client) doRequestWithFile(url string, param url.Values, fileField string, filenames []string, result interface{}) error {
 	if len(this.apiKey) == 0 || len(this.apiUser) == 0 {
 		return errors.New("请先配置 api 信息")
 	}
 
-	params.Add("apiUser", this.apiUser)
-	params.Add("apiKey", this.apiKey)
+	param.Add("apiUser", this.apiUser)
+	param.Add("apiKey", this.apiKey)
 
 	var body = &bytes.Buffer{}
 	var writer = multipart.NewWriter(body)
@@ -150,7 +150,7 @@ func (this *Client) doRequestWithFile(url string, params url.Values, fileField s
 		file.Close()
 	}
 
-	for key, value := range params {
+	for key, value := range param {
 		_ = writer.WriteField(key, value[0])
 	}
 

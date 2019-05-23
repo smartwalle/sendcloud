@@ -35,9 +35,9 @@ type UserInfoRsp struct {
 
 // GetUserInfo 查询当前用户的相关信息
 func (this *Client) GetUserInfo() (result *UserInfoRsp, err error) {
-	params := url.Values{}
+	param := url.Values{}
 
-	if err = this.doRequest(kUserInfoGet, params, &result); err != nil {
+	if err = this.doRequest(kUserInfoGet, param, &result); err != nil {
 		return nil, err
 	}
 
