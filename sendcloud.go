@@ -40,7 +40,7 @@ func (this *Client) doRequest(url string, param url.Values, result interface{}) 
 
 	var body = bytes.NewBufferString(param.Encode())
 	rsp, err := http.Post(url, "application/x-www-form-urlencoded", body)
-	if rsp.Body != nil {
+	if rsp != nil {
 		defer rsp.Body.Close()
 	}
 	if err != nil {
@@ -162,10 +162,12 @@ func (this *Client) doRequestWithFile(url string, param url.Values, fileField st
 	request.Header.Set("Content-Type", writer.FormDataContentType())
 
 	rsp, err := http.DefaultClient.Do(request)
+	if rsp != nil {
+		defer rsp.Body.Close()
+	}
 	if err != nil {
 		return err
 	}
-	defer rsp.Body.Close()
 
 	bodyByte, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
