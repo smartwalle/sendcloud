@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -51,6 +52,8 @@ func (this *Client) doRequest(url string, param url.Values, result interface{}) 
 	if err != nil {
 		return err
 	}
+
+	fmt.Println(string(bodyByte))
 
 	return json.Unmarshal(bodyByte, result)
 }
