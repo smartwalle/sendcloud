@@ -12,25 +12,25 @@ const (
 )
 
 type VoInfo struct {
-	Status        string `json:status`
-	EmailId       string `json:emailId`
-	ApiUser       string `json:apiUser`
-	Recipients    string `json:recipients`
-	RequestTime   string `json:requestTime`
-	ModifiedTime  string `json:modifiedTime`
-	SendLog       string `json:sendLog`
-	TaskName      string `json:taskName`
-	MailingStatus string `json:mailingStatus`
-	SubStatus     string `json:subStatus`
-	SoftStatus    string `json:softStatus`
-	TimeStr       string `json:timeStr`
-	Event         string `json:event`
-	Receiver      string `json:receiver`
-	Message       string `json:message`
-	Email         string `json:email`
-	Name          string `json:name`
-	Phone         string `json:phone`
-	SubStatusDesc string `json:subStatusDesc`
+	Status        string `json:"status"`
+	EmailId       string `json:"emailId"`
+	ApiUser       string `json:"apiUser"`
+	Recipients    string `json:"recipients"`
+	RequestTime   string `json:"requestTime"`
+	ModifiedTime  string `json:"modifiedTime"`
+	SendLog       string `json:"sendLog"`
+	TaskName      string `json:"taskName"`
+	MailingStatus string `json:"mailingStatus"`
+	SubStatus     int    `json:"subStatus"`
+	SoftStatus    string `json:"softStatus"`
+	TimeStr       string `json:"timeStr"`
+	Event         string `json:"event"`
+	Receiver      string `json:"receiver"`
+	Message       string `json:"message"`
+	Email         string `json:"email"`
+	Name          string `json:"name"`
+	Phone         string `json:"phone"`
+	SubStatusDesc string `json:"subStatusDesc"`
 }
 
 // --------------------------------------------------------------------------------
