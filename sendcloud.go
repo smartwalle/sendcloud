@@ -35,12 +35,10 @@ func (this *Client) doRequest(url string, values url.Values, result interface{})
 	values.Add("apiKey", this.apiKey)
 
 	rsp, err := http.Post(url, "application/x-www-form-urlencoded", strings.NewReader(values.Encode()))
-	if rsp != nil {
-		defer rsp.Body.Close()
-	}
 	if err != nil {
 		return err
 	}
+	defer rsp.Body.Close()
 
 	bodyBytes, err := io.ReadAll(rsp.Body)
 	if err != nil {
